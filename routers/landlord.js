@@ -47,7 +47,7 @@ router.post("/landlordRegister", upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "File must be valid" });
     }
     const { error } = await registerData(req.body);
-    if (error) {
+    if (error && req.file) {
       let files = fs.readdirSync("./public/images");
       if (files.includes(req.file.originalname)) {
         fs.unlinkSync("./public/images/" + req.file.originalname);
@@ -230,14 +230,6 @@ router.post("/editprofile", upload.single("image"), auth, async (req, res) => {
       ...req.body,
       image: new_image,
     });
-
-    // const updatedData = await Landlord.findByIdAndUpdate(id, datas, {
-    //   new: true,
-    // });
-    // let files = fs.readdirSync("./public/images");
-    // if (files.includes(data.image)) {
-    //   fs.unlinkSync("./public/images/" + data.image);
-    // }
 
     res.status(200).json({ message: "Profile Updated.." });
   } catch (error) {
