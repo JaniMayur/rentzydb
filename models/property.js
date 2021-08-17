@@ -68,6 +68,10 @@ const propertySchema = mongoose.Schema(
     datetime: {
       type: String,
     },
+    landlord_id: { type: mongoose.Schema.ObjectId, ref: "Landlord" },
+    // landlord_id: {
+    //   type: String,
+    // },
     time: { type: String },
   },
 

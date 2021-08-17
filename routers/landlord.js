@@ -67,7 +67,9 @@ router.post("/landlordRegister", upload.single("image"), async (req, res) => {
         confirm_password: repassword,
       });
       await landlord.save();
-      res.status(200).json({ landlord });
+      const Token = jwt.sign({ _id: landlord._id }, process.env.SECRETKEY);
+
+      res.status(200).json({ landlord, Token });
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -236,5 +238,6 @@ router.post("/editprofile", upload.single("image"), auth, async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 });
+
 
 module.exports = router;

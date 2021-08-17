@@ -52,7 +52,7 @@ router.post("/renderRegister", upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "File must be valid" });
     }
     const { error } = await regrenterData(req.body);
-    if (error) {
+    if (error && req.file) {
       let files = fs.readdirSync("./public/images");
       if (files.includes(req.file.originalname)) {
         fs.unlinkSync("./public/images/" + req.file.originalname);

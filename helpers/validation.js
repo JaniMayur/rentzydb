@@ -52,7 +52,7 @@ const propertyData = (data) => {
     squarefoot: Joi.number().required(),
     rent: Joi.number().required(),
     deposit: Joi.number().required(),
-    address: Joi.string().min(2).max(64).required(),
+    address: Joi.string().trim().min(2).max(64).required(),
     propertytype: Joi.string().alphanum().min(2).max(64).required(),
     datetime: Joi.string().required(),
     time: Joi.string().required(),
