@@ -49,7 +49,6 @@ const renterSchema = mongoose.Schema(
     },
     image: {
       type: String,
-      required: true,
     },
     topay: {
       type: String,

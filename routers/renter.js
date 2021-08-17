@@ -44,12 +44,12 @@ const upload = multer({
 
 router.post("/renderRegister", upload.single("image"), async (req, res) => {
   try {
+    let new_img = "";
+    if (req.file) {
+      new_img = req.file.originalname;
+    }
     if (req.fileValidationError) {
       return res.status(400).json({ message: "File must be valid" });
-    } else if (!req.file) {
-      return res
-        .status(200)
-        .json({ message: "Please select an image to upload" });
     }
     const { error } = await regrenterData(req.body);
     if (error) {
@@ -67,7 +67,7 @@ router.post("/renderRegister", upload.single("image"), async (req, res) => {
       const repassword = await bcrypt.hash(req.body.confirm_password, 8);
       renter = new Renter({
         ...req.body,
-        image: req.file.originalname,
+        image: new_img,
         password: password,
         confirm_password: repassword,
       });
