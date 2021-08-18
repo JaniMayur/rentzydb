@@ -296,13 +296,25 @@ router.get("/renter_property", auth, async (req, res) => {
 
     if (Object.keys(req.query).length === 0) {
       let data;
-      data = await Property.find({
-        $or: [
-          { bedroom: req.renter.bedroom },
-          { rent: req.renter.topay },
-          { school: req.renter.school },
-        ],
-      });
+      console.log("rr", req.renter.bedroom);
+      if (req.renter.bedroom > 4) {
+        data = await Property.find({
+          $or: [
+            { bedroom: { $gt: 4 } },
+            { rent: req.renter.topay },
+            { school: req.renter.school },
+          ],
+        });
+      } else {
+        data = await Property.find({
+          $or: [
+            { bedroom: req.renter.bedroom },
+            { rent: req.renter.topay },
+            { school: req.renter.school },
+          ],
+        });
+      }
+
       response = data;
     }
     res.status(200).json({ response });

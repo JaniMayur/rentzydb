@@ -73,6 +73,7 @@ const propertySchema = mongoose.Schema(
     //   type: String,
     // },
     time: { type: String },
+    status: { type: Boolean, default: false },
   },
 
   { timestamps: true }
