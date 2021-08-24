@@ -47,6 +47,9 @@ const renterSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    bathroom: {
+      type: Number,
+    },
     image: {
       type: String,
     },
@@ -58,12 +61,16 @@ const renterSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-
+    hometype: {
+      type: Array,
+    },
+    amenities: {
+      type: Array,
+    },
     resetPasswordToken: String,
     otp: String,
     resetPasswordExpires: Date,
   },
-
   { timestamps: true }
 );
 

@@ -11,7 +11,6 @@ module.exports = async function (req, res, next) {
     const verified = jwt.verify(token, process.env.SECRETKEY);
 
     const renter = await Renter.findById(verified._id);
-    // console.log(admin);
     if (!renter) {
       return res.status(400).json({ message: "Access Denied" });
     }
