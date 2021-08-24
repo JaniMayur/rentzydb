@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const geocoder = require("../utils/geocoder");
 
 const propertySchema = mongoose.Schema(
   {
@@ -7,6 +8,16 @@ const propertySchema = mongoose.Schema(
       required: true,
       minlength: 2,
       maxlength: 64,
+    },
+    loc: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number],
+        index: "2dsphere",
+      },
     },
     unitnumber: {
       type: Number,
@@ -38,7 +49,6 @@ const propertySchema = mongoose.Schema(
       type: String,
       required: true,
     },
-
     school: {
       type: Array,
       required: true,
@@ -68,16 +78,26 @@ const propertySchema = mongoose.Schema(
     datetime: {
       type: String,
     },
+    likedby: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Renter",
+    },
     landlord_id: { type: mongoose.Schema.ObjectId, ref: "Landlord" },
-    // landlord_id: {
-    //   type: String,
-    // },
     time: { type: String },
     status: { type: Boolean, default: false },
   },
 
   { timestamps: true }
 );
-
+propertySchema.pre("save", async function (next) {
+  const loc = await geocoder.geocode(this.address);
+  console.log(loc);
+  this.loc = {
+    type: "Point",
+    coordinates: [loc[0].longitude, loc[0].latitude],
+  };
+  // this.address = undefined;
+  next();
+});
 const Property = mongoose.model("property", propertySchema);
 module.exports = Property;

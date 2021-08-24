@@ -2,6 +2,7 @@ require("dotenv").config("../env");
 const router = require("express").Router();
 const Renter = require("../models/renter");
 const Property = require("../models/property");
+const mongoose = require("mongoose");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -13,6 +14,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const auth = require("../helpers/user-auth");
 const _ = require("lodash");
+const { func } = require("joi");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -42,8 +44,10 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-router.post("/renderRegister", upload.single("image"), async (req, res) => {
+router.post("/renterRegister", upload.single("image"), async (req, res) => {
   try {
+    console.log("rf", req.body);
+    console.log("rf1", req.file);
     let new_img = "";
     if (req.file) {
       new_img = req.file.originalname;
@@ -72,9 +76,9 @@ router.post("/renderRegister", upload.single("image"), async (req, res) => {
         confirm_password: repassword,
       });
       await renter.save();
+
       const Token = jwt.sign({ _id: renter._id }, process.env.SECRETKEY);
 
-      // console.log("ren", renter._id);
       // const data = await Property.find({});
       // res.status(200).json({ data });
       res.status(200).json({ Token });
@@ -242,7 +246,6 @@ router.post(
         ...req.body,
         image: new_image,
       });
-
       res.status(200).json({ message: "Profile Updated.." });
     } catch (error) {
       return res.status(400).json({ message: error.message });
@@ -252,51 +255,12 @@ router.post(
 router.get("/renter_property", auth, async (req, res) => {
   try {
     var response = [];
-    console.log(req.query);
     const property = await Property.find({});
-
-    if (typeof req.query.bedroom != "undefined") {
-      property.filter(function (store) {
-        if (store.bedroom == req.query.bedroom) {
-          response.push(store);
-        }
-      });
-    }
-    if (typeof req.query.bathroom != "undefined") {
-      property.filter(function (store) {
-        if (store.bathroom == req.query.bathroom) {
-          response.push(store);
-        }
-      });
-    }
-    if (typeof req.query.price != "undefined") {
-      property.filter(function (store) {
-        if (store.rent == req.query.price) {
-          response.push(store);
-        }
-      });
-    }
-
-    if (typeof req.query.hometype != "undefined") {
-      property.filter(function (store) {
-        if (store.propertytype == req.query.hometype) {
-          response.push(store);
-        }
-      });
-    }
-    if (typeof req.query.amenities != "undefined") {
-      property.filter(function (store) {
-        store.find({
-          stock: { $elemMatch: { country: "01", "warehouse.code": "02" } },
-        });
-      });
-    }
 
     response = _.uniqBy(response, "id");
 
     if (Object.keys(req.query).length === 0) {
       let data;
-      console.log("rr", req.renter.bedroom);
       if (req.renter.bedroom > 4) {
         data = await Property.find({
           $or: [
@@ -314,7 +278,6 @@ router.get("/renter_property", auth, async (req, res) => {
           ],
         });
       }
-
       response = data;
     }
     res.status(200).json({ response });
@@ -322,4 +285,103 @@ router.get("/renter_property", auth, async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 });
+router.post("/filter_property", auth, async (req, res) => {
+  try {
+    const updatedData = await Renter.findByIdAndUpdate(
+      req.renter._id,
+      { ...req.body },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Propery Updated.." });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+router.get("/nearest_property", auth, async (req, res) => {
+  try {
+    console.log(req.renter);
+    const prop = await Property.find({
+      location: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [50, 50] },
+          $maxDistance: 500,
+          $minDistance: 0,
+        },
+      },
+    });
+    return res.status(200).json({ prop });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+router.post("/contact", auth, async function (req, res) {
+  try {
+    const id = req.renter._id;
+    const data = await Renter.findById(id);
+    console.log("ps", data.password);
+
+    const smtpTransport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "mj.idea2code@gmail.com",
+        pass: "jani@1324@mayur",
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      to: "mj.idea2code@gmail.com",
+      from: req.body.email,
+      subject: "Suggetions",
+      text: req.body.description,
+    };
+    smtpTransport.sendMail(mailOptions, function (err) {
+      console.log("mail sent");
+      return res.status(400).json({ message: "mail sent successfully" });
+    });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+router.post("/like/:id", auth, async function (req, res) {
+  try {
+    console.log(req.renter._id);
+    const data = await Property.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: { likedby: req.renter._id },
+      },
+      { new: true }
+    );
+    return res.status(400).json({ data });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+router.get("/liked", auth, async function (req, res) {
+  try {
+    const renter = await Renter.findById(req.renter._id);
+    const data = await Property.find({ likedby: req.renter._id });
+    res.status(200).json({ data, renter });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+// router.get("/liked/:id", auth, async function (req, res) {
+//   try {
+//     // const renter = await Renter.findOne({ _id: req.renter._id });
+//     // let id = mongoose.Types.ObjectId(req.params.id);
+
+//     const data = await Property.findOne({
+//       _id: req.params.id,
+//       likedby: req.renter._id,
+//     });
+//     res.status(200).json({ data });
+//   } catch (error) {
+//     return res.status(400).json({ message: error.message });
+//   }
+// });
 module.exports = router;
