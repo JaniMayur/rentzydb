@@ -48,7 +48,6 @@ router.post("/addproperty", auth, async (req, res) => {
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
-
     let property = await Property.findOne({ address: req.body.address });
     if (property) {
       return res
@@ -66,7 +65,6 @@ router.post("/addproperty", auth, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
-
 router.post("/property_update/:id", auth, async function (req, res) {
   try {
     const update = await Property.findById(req.params.id);
@@ -76,13 +74,13 @@ router.post("/property_update/:id", auth, async function (req, res) {
 
     const updatedData = await Property.findByIdAndUpdate(req.params.id, {
       ...req.body,
-
-      loc: {
-        type: "Point",
-        coordinates: [loc[0].longitude, loc[0].latitude],
+      $set: {
+        loc: {
+          type: "Point",
+          coordinates: [loc[0].longitude, loc[0].latitude],
+        },
       },
     });
-
     res.status(200).json({ message: "Propery Updated.." });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -92,10 +90,27 @@ router.delete("/property_delete/:id", auth, async function (req, res) {
   try {
     const dd = await Property.findById(req.params.id);
     const deletedData = await Property.findByIdAndDelete(dd._id);
-    res.status(200).json({ message: "Property Deleted.." });
+    return res.status(200).json({ message: "Property Deleted.." });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 });
-
+router.post("/property_status/:id", auth, async function (req, res) {
+  try {
+    const st = await Property.findById(req.params.id);
+    if (st.status == false) {
+      await Property.findByIdAndUpdate(req.params.id, {
+        $set: { status: true },
+      });
+      return res.status(200).json({ message: "status activated" });
+    } else {
+      await Property.findByIdAndUpdate(req.params.id, {
+        $set: { status: false },
+      });
+      return res.status(200).json({ message: "status deactivated" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
 module.exports = router;

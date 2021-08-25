@@ -46,7 +46,7 @@ const propertyData = (data) => {
     amenities: Joi.array().items(Joi.string().min(2).max(64).required()),
     pets: Joi.array().items(Joi.string().min(2).max(64).required()),
     date: Joi.string().required(),
-    unitnumber: Joi.number().required(),
+    // unitnumber: Joi.number().required(),
     bedroom: Joi.number().required(),
     bathroom: Joi.number().required(),
     squarefoot: Joi.number().required(),

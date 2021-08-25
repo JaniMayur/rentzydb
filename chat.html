@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+      integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>ChatCord App</title>
+  </head>
+  <body>
+    <div class="chat-container">
+      <header class="chat-header">
+        <h1><i class="fas fa-smile"></i> ChatCord</h1>
+        <div class="chat-form-container">
+        
+          <input
+            id="token"
+            type="text"
+            placeholder="Enter Token"
+            required
+            autocomplete="off"
+          />
+        
+      
+
+          <button class="btn" onclick="mydata()"> Join</button>
+      
+        </div>
+        <!-- <a href="index.html" class="btn">Leave Room</a> -->
+      </header>
+      <main class="chat-main">
+        <div class="chat-sidebar">
+          <h3><i class="fas fa-comments"></i> Property Name:</h3>
+
+          <h2 id="room-name"></ul></h2>
+          <h3><i class="fas fa-comments"></i> User Name:</h3>
+          <h2 id="user-name"></h2>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+
+        <div id="feedbacks"></div>
+      </main>
+      <div class="chat-form-container">
+        <form id="chat-form" action="#">
+          <input
+            id="prop"
+            type="text"
+            placeholder="Enter Property"
+            required
+            autocomplete="off"
+          />
+          <input
+          id="landlord"
+          type="text"
+          placeholder="Enter Landlord"
+          required
+          autocomplete="off"
+        />
+        <input
+        id="renter"
+        type="text"
+        placeholder="Enter renter"
+        required
+        autocomplete="off"
+      />
+        <input
+        id="msg"
+        type="text"
+        placeholder="Enter Message"
+        required
+        autocomplete="off"
+      />
+      
+
+          <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
+        </form>
+      </div>
+    </div>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.10.1/qs.min.js"
+      integrity="sha512-aTKlYRb1QfU1jlF3k+aS4AqTpnTXci4R79mkdie/bp6Xm51O5O3ESAYhvg6zoicj/PD6VYY0XrYwsWLcvGiKZQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- <script src="js/main.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js"
+      integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      const socket = io();
+
+      const chatForms = document.getElementById("chat-form");
+      chatForms.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const msg = message.value;
+        const prop = property.value;
+        const landlords = landlord.value;
+        const rent = renter.value;
+    
+        console.log("msg",msg)
+        console.log("prop",prop)
+        console.log("land",landlords)
+        console.log("rent",rent)
+      
+        socket.emit("chatmsg", {
+          msg: msg,
+          prop: prop,
+          ll:landlords,
+          rent:rent,  
+        });
+        // message.value = "";
+        // property.value = "";
+        // landlord.value = "";
+        // renter.value = "";
+      });
+   
+
+      socket.on("message", (data) => {
+        console.log("dats", data);
+        outputMessage(data);
+
+        chatmessages.scrollTop = chatmessages.scrollHeight;
+      });
+    
+     
+      function outputMessage(data) {
+        const div = document.createElement("div");
+        div.classList.add("message");
+      //   div.innerHTML += `<p class="meta">${data.email} <span>${data.time}</span></p>
+
+      // <p class="text">
+      //  ${data.msg}
+      // </p>
+      // `;
+          div.innerHTML = `
+        <p class="text">
+         ${data}
+        </p>`;
+        document.querySelector(".chat-messages").appendChild(div);
+      }
+      function mydata(){
+        const Token = document.getElementById("token");
+      const token = Token.value;
+      console.log("axios",  token)
+
+        axios
+        .get(`http://localhost:8000/liked`, {
+          headers: {
+            Authorization: `basic ${token}`,
+          },
+        })
+        .then(({ data }) => {
+          console.log(data);
+         
+          roomName.innerHTML = `
+          ${data.data.map((user) => `<li>${user.address}</li>`).join("")}`;
+
+          userName.innerText = data.renter.firstname;
+          renter.value=data.renter._id;
+          const prop = data.data[0]._id;
+          const landlords = data.data[0].landlord_id;
+          console.log("prolord",prop,landlords)
+          socket.emit("joinRoom", { prop, landlords }); 
+        });
+      //   const Token = document.getElementById("token");
+      // const token = Token.value;
+      // console.log("axios",  token)
+
+        axios
+        .get(`http://localhost:8000/likedproperty`, {
+          headers: {
+            Authorization: `basic ${token}`,
+          },
+        })
+        .then(({ data }) => {
+          console.log(data);
+         
+          roomName.innerHTML = `
+          ${data.data.map((user) => `<li>${user.address}</li>`).join("")}`;
+
+          userName.innerText = data.renter.firstname;
+          renter.value=data.renter._id
+
+        
+        });
+      
+      }
+    </script>
+    <script>
+      // const { email, groupname } = Qs.parse(location.search, {
+      //   ignoreQueryPrefix: true,
+      // });
+      // const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFlMjhmMDgzOGIzODIyZDhkMGRkMzgiLCJpYXQiOjE2Mjk0NDIwNDR9.K6muqhjH69nm_658qsEvLJclue96wQ4OH_m_9Qb_h-8`;
+
+      const message = document.getElementById("msg");
+      const property = document.getElementById("prop");
+      const landlord = document.getElementById("landlord");
+      const renter = document.getElementById("renter");
+      const feedback = document.getElementById("feedbacks");
+      const roomName = document.getElementById("room-name");
+      const userName = document.getElementById("user-name");
+      const userList = document.getElementById("users");
+      const Token = document.getElementById("token");
+      const chatmessages = document.querySelector(".chat-messages");
+      const token = Token.value;
+
+      console.log("mytoks",token)      
+    </script>
+  
+  </body>
+</html>

@@ -21,7 +21,6 @@ const propertySchema = mongoose.Schema(
     },
     unitnumber: {
       type: Number,
-      required: true,
       minlength: 2,
       maxlength: 64,
     },
