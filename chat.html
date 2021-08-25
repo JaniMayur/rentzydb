@@ -155,7 +155,7 @@
       console.log("axios",  token)
 
         axios
-        .get(`http://localhost:8000/liked`, {
+        .get(`http://ec2-18-117-183-48.us-east-2.compute.amazonaws.com/api/liked`, {
           headers: {
             Authorization: `basic ${token}`,
           },
@@ -170,15 +170,15 @@
           renter.value=data.renter._id;
           const prop = data.data[0]._id;
           const landlords = data.data[0].landlord_id;
-          console.log("prolord",prop,landlords)
+          console.log("prolord",prop,landlords);
           socket.emit("joinRoom", { prop, landlords }); 
         });
       //   const Token = document.getElementById("token");
       // const token = Token.value;
-      // console.log("axios",  token)
+      // console.log("axios",  token);
 
         axios
-        .get(`http://localhost:8000/likedproperty`, {
+        .get(`http://ec2-18-117-183-48.us-east-2.compute.amazonaws.com/api/likedproperty`, {
           headers: {
             Authorization: `basic ${token}`,
           },
@@ -190,7 +190,7 @@
           ${data.data.map((user) => `<li>${user.address}</li>`).join("")}`;
 
           userName.innerText = data.renter.firstname;
-          renter.value=data.renter._id
+          renter.value = data.renter._id;
 
         
         });
@@ -215,7 +215,7 @@
       const chatmessages = document.querySelector(".chat-messages");
       const token = Token.value;
 
-      console.log("mytoks",token)      
+      console.log("mytoks",token);      
     </script>
   
   </body>
