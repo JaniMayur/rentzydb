@@ -292,7 +292,6 @@ router.post("/filter_property", auth, async (req, res) => {
       { ...req.body },
       { new: true }
     );
-
     res.status(200).json({ message: "Propery Updated.." });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -331,7 +330,6 @@ router.post("/contact", auth, async function (req, res) {
         rejectUnauthorized: false,
       },
     });
-
     const mailOptions = {
       to: "mj.idea2code@gmail.com",
       from: req.body.email,
@@ -373,7 +371,7 @@ router.get("/liked", auth, async function (req, res) {
 // router.get("/liked/:id", auth, async function (req, res) {
 //   try {
 //     // const renter = await Renter.findOne({ _id: req.renter._id });
-//     // let id = mongoose.Types.ObjectId(req.params.id);
+    // let id = mongoose.Types.ObjectId(req.params.id);
 
 //     const data = await Property.findOne({
 //       _id: req.params.id,

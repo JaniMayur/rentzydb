@@ -186,7 +186,6 @@ router.post("/resetpasswordlandlord/:token", async (req, res) => {
         rejectUnauthorized: false,
       },
     });
-
     const mailOptions = {
       to: landlord.email,
       from: "mj.idea2code@gmail.com",
@@ -220,24 +219,19 @@ router.post("/editprofile", upload.single("image"), auth, async (req, res) => {
     if (req.fileValidationError) {
       return res.status(400).json({ message: "File must be valid" });
     }
-
     if (req.file) {
       new_image = req.file.originalname;
       fs.unlinkSync("./public/images/" + data.image);
     } else {
       new_image = data.image;
     }
-
     const updatedData = await Landlord.findByIdAndUpdate(id, {
       ...req.body,
       image: new_image,
     });
-
     res.status(200).json({ message: "Profile Updated.." });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 });
-
-
 module.exports = router;

@@ -14,10 +14,8 @@ const landlordSchema = mongoose.Schema(
       minlength: 2,
       maxlength: 64,
     },
-
     compnyname: {
       type: String,
-
       minlength: 2,
       maxlength: 64,
     },
